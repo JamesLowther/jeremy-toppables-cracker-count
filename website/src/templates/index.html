@@ -1,0 +1,36 @@
+<!doctype html>
+<title>Jeremy's Toppables Cracker Count</title>
+
+<body style="background-color: bisque;">
+    <h1>Jeremy's Toppables Cracker Count</h1>
+    <p>One question has been at the forefront on everyone's minds:</p>
+    <p style="font-weight: bold;">How many times has Jeremy taken a picture of
+        Christie Toppables
+        crackers
+        on his bike ride across Canada?</p>
+
+    <img style="width: 300px;" src="{{url_for('static', filename='toppables.jpg')}}" />
+
+    <h3>The answer: {{ total }} times so far!</h3>
+
+    <p>Using deep learning and AI technology, I've come to answer that question. For each new blog post, an AI model
+        will
+        use computer vision and object detection models to scan each image to find a box of Christie Toppables
+        crackers! No longer will you have to worry about what
+        Jeremy is
+        eating for lunch! Technology truely is amazing!</p>
+
+    <p style="font-style: italic;">Note: These detections are generated automatically and it gets it wrong sometimes.
+    </p>
+
+    <p>See the results below:</p>
+
+
+    {% for post in manifest %}
+    <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+    <h3>{{ post.updated_at }}</h3>
+    {% for scan in post.scans %}
+    <img style="margin: 10px 10px 10px;" src="{{url_for('static', filename=scan)}}" />
+    {% endfor %}
+    {% endfor %}
+</body>
