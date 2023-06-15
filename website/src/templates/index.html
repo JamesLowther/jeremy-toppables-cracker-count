@@ -3,6 +3,7 @@
 
 <body style="background-color: bisque;">
     <h1>Jeremy's Toppables Cracker Count</h1>
+    <p>Updated: {{ updated }}</p>
     <p>One question has been at the forefront on everyone's minds:</p>
     <p style="font-weight: bold;">How many times has Jeremy taken a picture of
         Christie Toppables/Tartinables
@@ -27,9 +28,9 @@
     <p>See the results below:</p>
 
 
-    {% for post in manifest %}
+    {% for post in posts %}
     <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
-    <h3>{{ post.updated_at }}</h3>
+    <h3>{{ post.scans|length }} Toppables box detected!</h3>
     {% for scan in post.scans %}
     <img style="margin: 10px 10px 10px;" src="{{url_for('static', filename=scan)}}" />
     {% endfor %}

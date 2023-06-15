@@ -145,5 +145,10 @@ def write_scan_manifest():
 
     manifest = sorted(manifest, key=lambda x: datetime.fromisoformat(x["updated_at"]), reverse=True)
 
+    manifest = {
+        "posts": manifest,
+        "manifest_updated": datetime.utcnow().strftime("%m/%d/%Y, %H:%M:%S")
+    }
+
     with open(f"{SCAN_DIR}/manifest.json", "w") as f:
         f.write(json.dumps(manifest))
