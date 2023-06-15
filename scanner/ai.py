@@ -26,7 +26,7 @@ def check_image(path, uuid, model):
     filtered_labels = []
 
     for i in range(len(scores)):
-        if scores[i] > SCORE_THRESHOLD:
+        if scores[i] >= SCORE_THRESHOLD:
             filtered_labels.append(labels[i])
             filtered_boxes.append(boxes[i])
 
