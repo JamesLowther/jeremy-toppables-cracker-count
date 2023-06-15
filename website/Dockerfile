@@ -12,4 +12,4 @@ WORKDIR /app/src
 
 EXPOSE 5000
 
-CMD ["gunicorn", "--access-logfile", "-", "--log-level", "INFO", "--bind", "0.0.0.0:5000", "api:app"]
+CMD ["gunicorn", "--access-logfile", "-", "--log-level", "INFO", "--bind", "0.0.0.0:5000", "main:app"]
