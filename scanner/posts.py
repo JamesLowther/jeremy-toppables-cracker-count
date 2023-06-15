@@ -58,7 +58,7 @@ def download_post_images(post):
     images = parsed_html.find_all("img")
 
     order = 0
-
+    image_count = 0
     for image in images:
         image_url = image.get("src")
         i = image_url.find("images/")
@@ -82,6 +82,7 @@ def download_post_images(post):
 
         cur.execute("INSERT INTO Images VALUES (?, ?, ?);", (download_path, post["uuid"], order))
 
+        image_count += 1
         order += 1
 
     print()
@@ -90,3 +91,6 @@ def download_post_images(post):
 
     con.commit()
     con.close()
+    
+    return image_count
+

@@ -90,6 +90,8 @@ def scan_unscanned_posts():
 
     model = core.Model.load("toppables.pth", ["toppables"])
 
+    scan_count = 0
+
     for row in res:
         order = 0
         uuid = row["uuid"]
@@ -105,12 +107,15 @@ def scan_unscanned_posts():
                 cur.execute("INSERT INTO Scans VALUES (?, ?, ?, ?);", (scan_path, uuid, path, order))
                 con.commit()
 
+                scan_count += 1
                 order += 1
 
         cur.execute("UPDATE Posts SET scanned=1 WHERE uuid=?;", (uuid,))
         con.commit()
 
     con.close()
+
+    return scan_count
 
 def write_scan_manifest():
     print("Writing scan manifest")
