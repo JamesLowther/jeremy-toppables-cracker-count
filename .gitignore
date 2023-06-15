@@ -1,7 +1,7 @@
 # Custom
 */images/
 scanner/scans/
-website/static/scans
+website/src/static/scans/
 *.db
 *.pth
 
