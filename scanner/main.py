@@ -1,7 +1,7 @@
 import posts
 import ai
 
-NEW_POST_LIMIT = 0
+NEW_POST_LIMIT = None
 
 def main():
     all_posts = posts.get_posts()
