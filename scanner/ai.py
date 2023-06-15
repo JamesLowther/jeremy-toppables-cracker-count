@@ -143,7 +143,7 @@ def write_scan_manifest():
 
     con.close()
 
-    manifest = sorted(manifest, key=lambda x: datetime.fromisoformat(x["updated_at"]))
+    manifest = sorted(manifest, key=lambda x: datetime.fromisoformat(x["updated_at"]), reverse=True)
 
     with open(f"{SCAN_DIR}/manifest.json", "w") as f:
         f.write(json.dumps(manifest))
