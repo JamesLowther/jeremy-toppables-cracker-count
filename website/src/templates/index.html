@@ -4,7 +4,8 @@
 
 <body style="background-color: peachpuff; cursor: url({{url_for('static', filename='toppables-x32.png')}}), crosshair;">
     <h1>Jeremy's Toppables Cracker Count</h1>
-    <p>Updated: {{ updated }}</p>
+    <p>Updated: {{ updated }} (version {{ version }})</p>
+    <br>
     <p>One question has been at the forefront of everyone's mind:</p>
     <p style="font-weight: bold;">How many times has Jeremy taken a picture of
         Christie Toppables/Tartinables
@@ -28,12 +29,13 @@
 
     <p>See the results below:</p>
 
-
     {% for post in posts %}
+    {% if post.scans[version]|length > 0 %}
     <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
-    <h3>{{ post.scans|length }} Toppables box(es) detected!</h3>
-    {% for scan in post.scans %}
+    <h3>{{ post.scans[version]|length }} Toppables box(es) detected!</h3>
+    {% for scan in post.scans[version] %}
     <img style="margin: 10px 10px 10px;" src="{{url_for('static', filename=scan)}}" />
     {% endfor %}
+    {% endif %}
     {% endfor %}
 </body>
