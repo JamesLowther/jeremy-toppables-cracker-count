@@ -15,6 +15,10 @@ def get_posts():
     while True:
         print(f"Getting post from api - page {page}")
         r = requests.get(f"{ENDPOINT}/ghost/api/content/posts", params={"key": KEY, "fields": "uuid,title,updated_at,url,html", "page": page})
+
+        if r.status_code != 200:
+            raise Exception(f"Error hitting blog api")
+
         j = r.json()
 
         posts += j["posts"]
@@ -91,6 +95,5 @@ def download_post_images(post):
 
     con.commit()
     con.close()
-    
-    return image_count
 
+    return image_count
