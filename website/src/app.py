@@ -34,7 +34,7 @@ def version2():
         updated = manifest["manifest_updated"]
         total = sum([len(x["scans"][version]) for x in posts])
 
-    except FileNotFoundError:
+    except (FileNotFoundError, KeyError):
         version=""
         posts = []
         updated = ""
