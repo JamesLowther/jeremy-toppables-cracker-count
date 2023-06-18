@@ -93,7 +93,7 @@ def scan_unscanned_posts():
     cur.execute("SELECT uuid FROM Posts WHERE scanned=0;")
     res = cur.fetchall()
 
-    scan_count = None
+    scan_count = 0
 
     for row in res:
         uuid = row["uuid"]
