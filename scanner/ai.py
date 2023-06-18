@@ -141,18 +141,27 @@ def write_scan_manifest():
     con, cur = db.connect()
 
     cur.execute("SELECT DISTINCT uuid FROM Scans;")
-    res = cur.fetchall()
+    uuid_res = cur.fetchall()
+
+    cur.execute("SELECT DISTINCT version FROM Scans;")
+    version_res = cur.fetchall()
+
+    versions = [ x["version"] for x in version_res ]
 
     manifest = []
 
-    for row in res:
+    for row in uuid_res:
         uuid = row["uuid"]
 
         cur.execute("SELECT * FROM Posts WHERE uuid=?;", (uuid,))
         post_res = cur.fetchone()
 
-        cur.execute("SELECT * FROM Scans WHERE uuid=? ORDER BY scan_order ASC;", (uuid,))
-        scans_res = cur.fetchall()
+        scans = dict()
+        for version in versions:
+            cur.execute("SELECT * FROM Scans WHERE uuid=? AND version=? ORDER BY scan_order ASC;", (uuid, version))
+            scans_res = cur.fetchall()
+
+            scans[version] = [x["scan_path"] for x in scans_res]
 
         manifest.append(
             {
@@ -160,7 +169,7 @@ def write_scan_manifest():
                 "title": post_res["title"],
                 "url": post_res["url"],
                 "updated_at": post_res["updated_at"],
-                "scans": [x["scan_path"] for x in scans_res]
+                "scans": scans
             }
         )
 
