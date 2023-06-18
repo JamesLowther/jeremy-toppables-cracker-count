@@ -18,7 +18,8 @@ def main():
         new_scan_count = ai.scan_unscanned_posts()
         ai.write_scan_manifest()
 
-        webhook.send_webhook(new_posts_count, new_image_count, new_scan_count)
+        if new_posts_count > 0:
+            webhook.send_webhook(new_posts_count, new_image_count, new_scan_count)
 
     except Exception as e:
         print(f"Error: {e}")
