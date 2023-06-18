@@ -15,7 +15,12 @@ SCAN_DIR="scans"
 
 SCORE_THRESHOLD = 0.9
 
-def check_image(path, uuid, model):
+# (version, model)
+MODELS = [
+    ("v1", "toppables.pth")
+]
+
+def check_image(path, version, model, uuid):
     print(f"Scanning {path}")
 
     image = utils.read_image(path)
@@ -34,7 +39,7 @@ def check_image(path, uuid, model):
         return None
 
     else:
-        scan_dir = f"{SCAN_DIR}/images/{uuid}"
+        scan_dir = f"{SCAN_DIR}/{version}/images/{uuid}"
         if not os.path.exists(scan_dir):
             os.makedirs(scan_dir)
 
@@ -88,30 +93,43 @@ def scan_unscanned_posts():
     cur.execute("SELECT uuid FROM Posts WHERE scanned=0;")
     res = cur.fetchall()
 
-    model = core.Model.load("toppables.pth", ["toppables"])
-
-    scan_count = 0
+    scan_count = None
 
     for row in res:
-        order = 0
         uuid = row["uuid"]
 
-        cur.execute("SELECT image_path FROM Images WHERE uuid=? ORDER BY image_order ASC;", (uuid,))
-        image_res = cur.fetchall()
-        image_paths = [x["image_path"] for x in image_res]
-
-        for path in image_paths:
-            scan_path = check_image(path, uuid, model)
-
-            if scan_path is not None:
-                cur.execute("INSERT INTO Scans VALUES (?, ?, ?, ?);", (scan_path, uuid, path, order))
-                con.commit()
-
-                scan_count += 1
-                order += 1
+        for version, model in MODELS:
+            print(f"Scanning version: {version} - model: {model}")
+            scan_count = scan_with_version(version, model, uuid)
 
         cur.execute("UPDATE Posts SET scanned=1 WHERE uuid=?;", (uuid,))
         con.commit()
+
+    con.close()
+
+    return scan_count
+
+def scan_with_version(version, model, uuid):
+    con, cur = db.connect()
+
+    model_file = core.Model.load(model, ["toppables"])
+
+    cur.execute("SELECT image_path FROM Images WHERE uuid=? ORDER BY image_order ASC;", (uuid,))
+    image_res = cur.fetchall()
+    image_paths = [x["image_path"] for x in image_res]
+
+    order = 0
+    scan_count = 0
+
+    for path in image_paths:
+        scan_path = check_image(path, version, model_file, uuid)
+
+        if scan_path is not None:
+            cur.execute("INSERT INTO Scans (scan_path, uuid, image_path, scan_order, version) VALUES (?, ?, ?, ?, ?);", (scan_path, uuid, path, order, version))
+            con.commit()
+
+            scan_count += 1
+            order += 1
 
     con.close()
 

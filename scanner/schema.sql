@@ -27,6 +27,7 @@ CREATE TABLE Scans (
     uuid        text,
     image_path  text,
     scan_order  integer,
+    version     integer,
     PRIMARY KEY (scan_path),
     FOREIGN KEY (uuid) REFERENCES Posts,
     FOREIGN KEY (image_path) REFERENCES Images
