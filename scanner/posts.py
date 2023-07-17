@@ -92,7 +92,7 @@ def download_post_images(post):
         file_name = os.path.basename(feature_image)
         download_path = f"{image_dir}/{file_name}"
 
-        download_image(feature_image, download_image, post["uuid"], order, cur)
+        download_image(feature_image, download_path, post["uuid"], order, cur)
 
         image_count += 1
         order += 1
