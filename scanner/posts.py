@@ -9,12 +9,20 @@ KEY = "e10981406c22cfddf07d7beb70"
 
 SIZE = "w600"
 
+
 def get_posts():
     posts = []
     page = 1
     while True:
         print(f"Getting post from api - page {page}")
-        r = requests.get(f"{ENDPOINT}/ghost/api/content/posts", params={"key": KEY, "fields": "uuid,title,updated_at,url,html", "page": page})
+        r = requests.get(
+            f"{ENDPOINT}/ghost/api/content/posts",
+            params={
+                "key": KEY,
+                "fields": "uuid,title,updated_at,url,html,feature_image",
+                "page": page,
+            },
+        )
 
         if r.status_code != 200:
             raise Exception(f"Error hitting blog api")
@@ -29,13 +37,14 @@ def get_posts():
 
     return posts
 
+
 def filter_posts(all_posts, limit=None):
     con, cur = db.connect()
     cur.execute("SELECT uuid FROM POSTS;")
     res = cur.fetchall()
     con.close()
 
-    existing_uuids = [ x["uuid"] for x in res ]
+    existing_uuids = [x["uuid"] for x in res]
 
     count = 0
     new_posts = []
@@ -48,6 +57,20 @@ def filter_posts(all_posts, limit=None):
             count += 1
 
     return new_posts
+
+
+def download_image(image_url, download_path, uuid, order, cur):
+    print(f"Downloading {image_url}")
+    r = requests.get(image_url)
+
+    if r.status_code != 200:
+        raise Exception(f"Error downloading image at path {image_url}")
+
+    with open(download_path, "wb") as f:
+        f.write(r.content)
+
+    cur.execute("INSERT INTO Images VALUES (?, ?, ?);", (download_path, uuid, order))
+
 
 def download_post_images(post):
     print(f"Downloading images for {post['uuid']}")
@@ -63,10 +86,21 @@ def download_post_images(post):
 
     order = 0
     image_count = 0
+
+    feature_image = post.get("feature_image")
+    if feature_image:
+        file_name = os.path.basename(feature_image)
+        download_path = f"{image_dir}/{file_name}"
+
+        download_image(feature_image, download_path, post["uuid"], order, cur)
+
+        image_count += 1
+        order += 1
+
     for image in images:
         image_url = image.get("src")
         i = image_url.find("images/")
-        image_url = image_url[:i + 7] + f"size/{SIZE}/" + image_url[i + 7:]
+        image_url = image_url[: i + 7] + f"size/{SIZE}/" + image_url[i + 7 :]
 
         file_name = os.path.basename(image_url)
 
@@ -75,23 +109,17 @@ def download_post_images(post):
 
         download_path = f"{image_dir}/{file_name}"
 
-        print(f"Downloading {image_url}")
-        r = requests.get(image_url)
-
-        if r.status_code != 200:
-            raise Exception(f"Error downloading image at path {image_url}")
-
-        with open(download_path, "wb") as f:
-            f.write(r.content)
-
-        cur.execute("INSERT INTO Images VALUES (?, ?, ?);", (download_path, post["uuid"], order))
+        download_image(image_url, download_path, post["uuid"], order, cur)
 
         image_count += 1
         order += 1
 
     print()
 
-    cur.execute("INSERT INTO Posts VALUES (?, ?, ?, ?, ?, ?);", (post["uuid"], post["title"], post["updated_at"], post["url"], post["html"], 0))
+    cur.execute(
+        "INSERT INTO Posts VALUES (?, ?, ?, ?, ?, ?);",
+        (post["uuid"], post["title"], post["updated_at"], post["url"], post["html"], 0),
+    )
 
     con.commit()
     con.close()
